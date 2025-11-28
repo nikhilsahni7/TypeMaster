@@ -8,14 +8,13 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
+
 	"github.com/nikhilsahni7/typeMaster/backend/internal/server"
 )
 
 func main() {
 	server := server.NewServer()
 
-	// Graceful shutdown context
-	// Create a channel to listen for OS signals
 	done := make(chan os.Signal, 1)
 	signal.Notify(done, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 
@@ -25,20 +24,16 @@ func main() {
 		}
 	}()
 
-	log.Printf("Server started on %s", server.Addr)
+	log.Printf("server started on %s", server.Addr)
 
-	// Block until we receive our signal.
 	<-done
-	log.Print("Server Stopped")
+	log.Print("server stopped")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer func() {
-		// extra handling here
-		cancel()
-	}()
+	defer cancel()
 
 	if err := server.Shutdown(ctx); err != nil {
-		log.Fatalf("Server Shutdown Failed:%+v", err)
+		log.Fatalf("server shutdown failed:%+v", err)
 	}
-	log.Print("Server Exited Properly")
+	log.Print("server exited properly")
 }

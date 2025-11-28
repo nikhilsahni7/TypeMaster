@@ -18,20 +18,17 @@ func NewServer() *http.Server {
 
 	db, err := database.New()
 	if err != nil {
-		// In production, you might want to retry or fail harder,
-		// but for now logging is fine as we might run without DB locally sometimes
-		fmt.Printf("Warning: Could not connect to database: %v\n", err)
+		fmt.Printf("cannot connect to database: %v\n", err)
 	}
 
-	NewServer := &Server{
+	s := &Server{
 		port: port,
 		db:   db,
 	}
 
-	// Declare Server config
 	server := &http.Server{
-		Addr:         fmt.Sprintf(":%d", NewServer.port),
-		Handler:      NewServer.RegisterRoutes(),
+		Addr:         fmt.Sprintf(":%d", s.port),
+		Handler:      s.RegisterRoutes(),
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 30 * time.Second,
