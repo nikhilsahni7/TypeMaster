@@ -198,34 +198,36 @@ export const TypingArena = ({ onComplete, onProgress }: TypingArenaProps) => {
     .slice(0, 3);
 
   return (
-    <div className="w-full max-w-5xl mx-auto p-8 flex flex-col gap-8">
+    <div className="w-full max-w-6xl mx-auto p-8 flex flex-col gap-12 min-h-[60vh] justify-center">
 
+      {/* Controls Header */}
       {!isActive && !isFinished && (
-        <div className="flex justify-between items-center bg-zinc-900/50 p-4 rounded-lg backdrop-blur-sm border border-zinc-800 animate-slide-up">
-          <div className="flex gap-4">
+        <div className="flex justify-between items-center bg-zinc-900/40 p-2 rounded-full backdrop-blur-sm border border-white/5 mx-auto">
+          <div className="flex gap-1 p-1">
             {(['easy', 'medium', 'hard'] as DifficultyType[]).map((d) => (
               <button
                 key={d}
                 onClick={() => setDifficulty(d)}
-                className={`text-xs font-mono uppercase px-3 py-1 rounded transition-all ${
+                className={`text-xs font-mono uppercase px-4 py-2 rounded-full transition-all ${
                   difficulty === d
-                    ? 'bg-yellow-400 text-black font-bold shadow-[0_0_10px_rgba(250,204,21,0.4)]'
-                    : 'text-zinc-500 hover:text-zinc-300'
+                    ? 'bg-zinc-800 text-white font-bold shadow-lg'
+                    : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/50'
                 }`}
               >
                 {d}
               </button>
             ))}
           </div>
-          <div className="flex gap-4">
+          <div className="w-px h-6 bg-white/10 mx-2"></div>
+          <div className="flex gap-1 p-1">
             {[15, 30, 60].map((t) => (
               <button
                 key={t}
                 onClick={() => setDuration(t)}
-                className={`text-xs font-mono px-3 py-1 rounded transition-all ${
+                className={`text-xs font-mono px-4 py-2 rounded-full transition-all ${
                   duration === t
-                    ? 'bg-yellow-400 text-black font-bold shadow-[0_0_10px_rgba(250,204,21,0.4)]'
-                    : 'text-zinc-500 hover:text-zinc-300'
+                    ? 'bg-yellow-400 text-black font-bold shadow-[0_0_15px_rgba(250,204,21,0.3)]'
+                    : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/50'
                 }`}
               >
                 {t}s
@@ -235,35 +237,46 @@ export const TypingArena = ({ onComplete, onProgress }: TypingArenaProps) => {
         </div>
       )}
 
-      <div className="flex justify-between items-end font-mono text-yellow-400">
-        <div className="text-5xl font-bold tracking-tighter">{timeLeft}s</div>
-        <div className="flex gap-8 text-xl">
-          <div className="flex flex-col items-end">
-             <span className="text-xs text-zinc-600">ACCURACY</span>
-             <span className={accuracy < 95 ? 'text-red-400' : 'text-white'}>{accuracy}%</span>
+      {/* Live Stats */}
+      <div className="flex justify-between items-end font-mono px-4">
+        <div className="text-6xl font-bold tracking-tighter text-yellow-400 tabular-nums">
+          {timeLeft}
+        </div>
+        <div className="flex gap-12 text-xl">
+          <div className="flex flex-col items-end gap-1">
+             <span className="text-[10px] tracking-widest text-zinc-500 uppercase">Accuracy</span>
+             <span className={`text-2xl font-bold ${accuracy < 95 ? 'text-red-400' : 'text-white'}`}>{accuracy}%</span>
           </div>
-          <div className="flex flex-col items-end">
-             <span className="text-xs text-zinc-600">WPM</span>
-             <span>{wpm}</span>
+          <div className="flex flex-col items-end gap-1">
+             <span className="text-[10px] tracking-widest text-zinc-500 uppercase">WPM</span>
+             <span className="text-2xl font-bold text-white">{wpm}</span>
           </div>
         </div>
       </div>
 
+      {/* Typing Area */}
       <div
-        className="relative font-mono text-2xl md:text-3xl leading-relaxed break-all min-h-[200px] outline-none"
+        className="relative font-mono text-3xl leading-[1.8] outline-none min-h-[200px] select-none"
         onClick={() => inputRef.current?.focus()}
       >
-        <div className="relative text-zinc-600 transition-all duration-100">
+        {/* Text Container - Optimized for performance */}
+        <div className="relative text-zinc-600 whitespace-pre-wrap break-words">
           {text.split('').map((char, i) => {
-            let className = 'transition-colors duration-75 ';
+            let className = 'relative ';
+            let isCurrent = i === input.length;
+
             if (i < input.length) {
               className += input[i] === char ? 'text-white' : 'text-red-500';
             }
-            if (i === input.length) {
-              className += ' bg-yellow-400/20 text-yellow-400 border-b-2 border-yellow-400 animate-pulse';
-            }
+
             return (
-              <span key={i} className={className}>{char}</span>
+              <span key={i} className={className}>
+                {/* CSS-only Cursor for zero latency */}
+                {isCurrent && isActive && (
+                  <span className="absolute -left-[1px] top-1 bottom-1 w-[2px] bg-yellow-400"></span>
+                )}
+                {char}
+              </span>
             );
           })}
         </div>
@@ -278,13 +291,13 @@ export const TypingArena = ({ onComplete, onProgress }: TypingArenaProps) => {
           autoFocus
           autoComplete="off"
         />
-
       </div>
 
+      {/* Results Modal */}
       {isFinished && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md animate-fade-in">
-          <div className="bg-zinc-950 border border-zinc-800 p-10 rounded-2xl max-w-2xl w-full text-center space-y-8 shadow-[0_0_50px_rgba(0,0,0,0.8)] relative overflow-hidden">
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-2 bg-gradient-to-r from-transparent via-yellow-400 to-transparent opacity-50"></div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+          <div className="bg-zinc-900 border border-zinc-800 p-10 rounded-3xl max-w-2xl w-full text-center space-y-8 shadow-2xl relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-yellow-400 to-transparent opacity-50"></div>
 
             <h2 className="text-4xl font-bold text-white font-mono tracking-tighter">SESSION_COMPLETE</h2>
 
@@ -296,53 +309,53 @@ export const TypingArena = ({ onComplete, onProgress }: TypingArenaProps) => {
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-               <div className="bg-zinc-900/50 p-4 rounded-lg border border-zinc-800 flex flex-col items-center justify-center">
-                  <div className="text-zinc-500 text-xs font-mono mb-2">CONSISTENCY</div>
+               <div className="bg-zinc-950/50 p-4 rounded-2xl border border-zinc-800/50 flex flex-col items-center justify-center gap-2">
+                  <div className="text-zinc-500 text-[10px] tracking-widest font-mono">CONSISTENCY</div>
                   <div className="text-2xl font-bold text-white">{calculateConsistency()}%</div>
-                  <div className="w-full h-1 bg-zinc-800 mt-2 rounded-full overflow-hidden">
+                  <div className="w-full h-1 bg-zinc-800 mt-1 rounded-full overflow-hidden">
                     <div className="h-full bg-blue-500" style={{ width: `${calculateConsistency()}%` }}></div>
                   </div>
                </div>
 
-               <div className="bg-zinc-900/50 p-4 rounded-lg border border-zinc-800 flex flex-col items-center justify-center">
-                  <div className="text-zinc-500 text-xs font-mono mb-2">IMPROVEMENT_NEEDED</div>
-                  <div className="flex gap-2">
+               <div className="bg-zinc-950/50 p-4 rounded-2xl border border-zinc-800/50 flex flex-col items-center justify-center gap-2">
+                  <div className="text-zinc-500 text-[10px] tracking-widest font-mono">IMPROVEMENT</div>
+                  <div className="flex gap-2 flex-wrap justify-center">
                     {topBadKeys.length > 0 ? (
                       topBadKeys.map(([key, count]) => (
-                        <span key={key} className="px-3 py-1 bg-red-500/10 text-red-400 border border-red-500/20 rounded font-mono text-sm">
-                          {key === ' ' ? 'SPACE' : key.toUpperCase()} ({count})
+                        <span key={key} className="px-2 py-1 bg-red-500/10 text-red-400 border border-red-500/20 rounded text-xs font-mono">
+                          {key === ' ' ? 'SPACE' : key.toUpperCase()}
                         </span>
                       ))
                     ) : (
-                      <span className="text-green-400 font-mono text-sm">NONE - PERFECT!</span>
+                      <span className="text-green-400 font-mono text-xs">PERFECT</span>
                     )}
                   </div>
                </div>
             </div>
 
-            <div className="flex gap-4 justify-center pt-8">
+            <div className="flex gap-4 justify-center pt-4">
               <button
                 onClick={startGame}
-                className="px-8 py-4 bg-yellow-400 text-black font-bold rounded hover:bg-yellow-300 transition-all hover:scale-105 hover:shadow-[0_0_20px_rgba(250,204,21,0.4)] w-full font-mono text-lg"
+                className="px-8 py-4 bg-white text-black font-bold rounded-xl hover:bg-zinc-200 transition-all hover:scale-[1.02] w-full font-mono text-lg shadow-xl"
               >
-                RESTART_SESSION (TAB)
+                RESTART_SESSION <span className="opacity-50 text-sm ml-2">(TAB)</span>
               </button>
             </div>
           </div>
         </div>
       )}
 
-      <div className="text-center text-zinc-600 text-xs font-mono mt-auto flex justify-center gap-8">
-        <span><span className="bg-zinc-800 px-1.5 py-0.5 rounded text-zinc-400">TAB</span> RESTART</span>
-        <span><span className="bg-zinc-800 px-1.5 py-0.5 rounded text-zinc-400">ESC</span> END</span>
+      <div className="text-center text-zinc-600 text-xs font-mono mt-auto flex justify-center gap-8 opacity-50">
+        <span><span className="bg-zinc-800 px-1.5 py-0.5 rounded text-zinc-400 border border-zinc-700">TAB</span> RESTART</span>
+        <span><span className="bg-zinc-800 px-1.5 py-0.5 rounded text-zinc-400 border border-zinc-700">ESC</span> END</span>
       </div>
     </div>
   );
 };
 
 const StatBox = ({ label, value, highlight = false, color = 'text-white' }: { label: string, value: string | number, highlight?: boolean, color?: string }) => (
-  <div className={`bg-zinc-900 p-6 rounded-xl border ${highlight ? 'border-yellow-400/50 bg-yellow-400/5' : 'border-zinc-800'}`}>
-    <div className="text-zinc-500 text-xs font-mono mb-1">{label}</div>
+  <div className={`bg-zinc-950/50 p-6 rounded-2xl border ${highlight ? 'border-yellow-400/20 bg-yellow-400/5' : 'border-zinc-800/50'}`}>
+    <div className="text-zinc-500 text-[10px] tracking-widest font-mono mb-2">{label}</div>
     <div className={`text-4xl font-bold ${highlight ? 'text-yellow-400' : color}`}>{value}</div>
   </div>
 );

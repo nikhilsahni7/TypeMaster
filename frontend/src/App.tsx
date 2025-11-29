@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
 import { FooterStatus } from './components/FooterStatus'
-import { LandingPage } from './components/LandingPage'
-import { ProfilePage } from './components/ProfilePage'
 import { TypingArena } from './components/TypingArena'
 import { useWebSocket } from './hooks/useWebSocket'
+import { LandingPage } from './pages/LandingPage'
+import { ProfilePage } from './pages/ProfilePage'
 import { getOrCreateProfile } from './utils/auth'
 
 type ViewState = 'landing' | 'arena' | 'profile';
