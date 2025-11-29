@@ -1,0 +1,2 @@
+ALTER TABLE matches ADD COLUMN IF NOT EXISTS bad_keys JSONB DEFAULT '{}';
+ALTER TABLE matches ADD COLUMN IF NOT EXISTS improvement_needed TEXT;

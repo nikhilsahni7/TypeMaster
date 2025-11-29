@@ -9,6 +9,11 @@ func (s *Server) RegisterRoutes() http.Handler {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/health", s.HealthHandler)
+	mux.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
+		ServeWs(s.hub, w, r)
+	})
+
+	mux.HandleFunc("/api/history", s.handleGetHistory)
 
 	return s.corsMiddleware(mux)
 }

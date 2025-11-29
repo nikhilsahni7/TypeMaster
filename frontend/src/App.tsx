@@ -1,53 +1,105 @@
+import { useEffect, useState } from 'react'
+import { FooterStatus } from './components/FooterStatus'
+import { LandingPage } from './components/LandingPage'
+import { ProfilePage } from './components/ProfilePage'
+import { TypingArena } from './components/TypingArena'
+import { useWebSocket } from './hooks/useWebSocket'
+import { getOrCreateProfile } from './utils/auth'
+
+type ViewState = 'landing' | 'arena' | 'profile';
 
 function App() {
+  const [health, setHealth] = useState<{ status: string; db_status?: string; redis_status?: string } | null>(null)
+  const [view, setView] = useState<ViewState>('landing')
+  const { isConnected, sendMessage } = useWebSocket(`${import.meta.env.VITE_API_URL.replace('http', 'ws')}/ws`)
+  const user = getOrCreateProfile()
+
+  useEffect(() => {
+    if (isConnected) {
+      // Join lobby as guest
+      sendMessage('join_lobby', {
+        room_id: 'global_arena',
+        user_id: user.id,
+        username: user.username
+      })
+    }
+  }, [isConnected, sendMessage, user.id, user.username])
+
+  useEffect(() => {
+    fetch(`${import.meta.env.VITE_API_URL}/health`)
+      .then(res => res.json())
+      .then(data => setHealth(data))
+      .catch(err => console.error("Failed to fetch health:", err))
+  }, [])
+
+  const handleGameComplete = (stats: any) => {
+    console.log("Game Finished:", stats)
+    sendMessage('game_end', {
+      ...stats,
+      user_id: user.id,
+      room_id: 'global_arena',
+      language: 'english',
+      raw_wpm: stats.raw_wpm || stats.wpm,
+      consistency: stats.consistency || 100,
+      error_count: stats.error_count || 0,
+      bad_keys: stats.bad_keys || {},
+      improvement_needed: stats.improvement_needed || "None"
+    })
+    // Keep view to show results overlay
+  }
+
+  const handleProgress = (stats: any) => {
+    sendMessage('typing_update', {
+      user_id: user.id,
+      room_id: 'global_arena',
+      wpm: stats.wpm,
+      progress: stats.progress,
+      accuracy: 100
+    })
+  }
+
   return (
-    <div className="min-h-screen w-full bg-slate-950 flex flex-col items-center justify-center text-white p-4">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-slate-900 via-slate-950 to-black -z-10"></div>
+    <div className="min-h-screen w-full flex flex-col relative overflow-hidden font-sans text-zinc-200 bg-zinc-950">
 
-      <main className="max-w-4xl w-full text-center space-y-8">
-        <div className="space-y-4">
-          <h1 className="text-6xl md:text-8xl font-bold tracking-tighter bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 text-transparent bg-clip-text animate-pulse">
-            TypeMaster
-          </h1>
-          <p className="text-xl md:text-2xl text-slate-400 font-light tracking-wide">
-            The Ultimate High-Performance Typing Arena
-          </p>
+      <nav className="w-full px-8 py-6 flex justify-between items-center border-b border-white/5 backdrop-blur-sm z-10">
+        <div
+          className="flex items-center gap-2 cursor-pointer"
+          onClick={() => setView('landing')}
+        >
+          <div className="w-3 h-3 bg-yellow-400 rounded-sm animate-pulse"></div>
+          <span className="font-mono font-bold text-xl tracking-tighter">TYPEMASTER_v1</span>
         </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
-          <FeatureCard
-            title="Zero Latency"
-            desc="Powered by Go & WebSockets for instant feedback."
-            icon="⚡"
-          />
-          <FeatureCard
-            title="Multiplayer"
-            desc="Race against friends or the world in real-time."
-            icon="🎮"
-          />
-          <FeatureCard
-            title="Analytics"
-            desc="Deep dive into your WPM, consistency, and accuracy."
-            icon="📊"
-          />
-        </div>
-
-        <div className="pt-12">
-          <button className="px-8 py-4 bg-white text-black font-bold rounded-full hover:scale-105 transition-transform duration-200 shadow-[0_0_20px_rgba(255,255,255,0.3)]">
-            Enter the Arena
+        <div className="flex gap-6 text-sm font-mono text-zinc-500 items-center">
+          <button
+            onClick={() => setView('profile')}
+            className="text-zinc-400 hover:text-white transition-colors flex items-center gap-2"
+          >
+            USER: <span className="text-white border-b border-zinc-700 pb-0.5">{user.username}</span>
           </button>
         </div>
-      </main>
-    </div>
-  )
-}
+      </nav>
 
-function FeatureCard({ title, desc, icon }: { title: string, desc: string, icon: string }) {
-  return (
-    <div className="p-6 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm hover:bg-white/10 transition-colors text-left">
-      <div className="text-4xl mb-4">{icon}</div>
-      <h3 className="text-xl font-bold mb-2 text-slate-200">{title}</h3>
-      <p className="text-slate-400 text-sm leading-relaxed">{desc}</p>
+      <main className="flex-1 flex flex-col items-center justify-center p-4 relative z-10 w-full">
+        {view === 'landing' && (
+          <LandingPage onStart={() => setView('arena')} />
+        )}
+
+        {view === 'arena' && (
+          <TypingArena
+            onComplete={handleGameComplete}
+            onProgress={handleProgress}
+          />
+        )}
+
+        {view === 'profile' && (
+          <ProfilePage
+            user={user}
+            onBack={() => setView('arena')}
+          />
+        )}
+      </main>
+
+      <FooterStatus health={health} isConnected={isConnected} />
     </div>
   )
 }
