@@ -3,6 +3,7 @@ package server
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"time"
 
@@ -24,7 +25,7 @@ func NewServer() *http.Server {
 
 	db, err := database.New()
 	if err != nil {
-		fmt.Printf("cannot connect to database: %v\n", err)
+		log.Fatalf("cannot connect to database: %v\n", err)
 	}
 
 	matchRepo := repository.NewMatchRepository(db.DB)

@@ -53,6 +53,8 @@ func connectToPostgres() (*pgxpool.Pool, error) {
 		return nil, fmt.Errorf("unable to parse database config: %v", err)
 	}
 
+	// Force IPv4 removed - we will use Connection Pooler (port 6543) instead
+
 	pool, err := pgxpool.NewWithConfig(ctx, config)
 	if err != nil {
 		return nil, fmt.Errorf("unable to create connection pool: %v", err)
