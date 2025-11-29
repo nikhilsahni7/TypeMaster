@@ -4,8 +4,8 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     restart: always
-    ports:
-      - "8080:8080"
+    # ports:
+    #   - "8080:8080"  <-- Removed to avoid conflict with Jenkins. Nginx talks to it internally.
     environment:
       - PORT=8080
       - DB_HOST=${DB_HOST}
