@@ -27,15 +27,21 @@ echo "Starting Jenkins..."
 sudo mkdir -p /var/jenkins_home
 sudo chown -R 1000:1000 /var/jenkins_home
 
-# Run Jenkins with Docker Socket mounted (so it can run docker commands)
+# Stop and remove existing container if it exists to update mounts
+sudo docker stop jenkins || true
+sudo docker rm jenkins || true
+
+# Run Jenkins with Docker Socket and Plugins mounted
 sudo docker run -d \
   --name jenkins \
   --restart always \
+  -u root \
   -p 8080:8080 \
   -p 50000:50000 \
   -v /var/jenkins_home:/var/jenkins_home \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -v $(which docker):/usr/bin/docker \
+  -v /usr/libexec/docker/cli-plugins:/usr/libexec/docker/cli-plugins \
   jenkins/jenkins:lts
 
 echo "Jenkins is starting! It may take a minute."
