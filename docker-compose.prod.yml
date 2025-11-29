@@ -17,6 +17,9 @@ services:
       - REDIS_PASSWORD=${REDIS_PASSWORD}
     networks:
       - typemaster-net
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
 
   frontend:
     build:
