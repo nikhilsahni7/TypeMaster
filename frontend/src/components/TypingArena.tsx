@@ -321,7 +321,7 @@ export const TypingArena = ({ onComplete, onProgress }: TypingArenaProps) => {
                   <div className="text-zinc-500 text-[10px] tracking-widest font-mono">IMPROVEMENT</div>
                   <div className="flex gap-2 flex-wrap justify-center">
                     {topBadKeys.length > 0 ? (
-                      topBadKeys.map(([key, count]) => (
+                      topBadKeys.map(([key]) => (
                         <span key={key} className="px-2 py-1 bg-red-500/10 text-red-400 border border-red-500/20 rounded text-xs font-mono">
                           {key === ' ' ? 'SPACE' : key.toUpperCase()}
                         </span>

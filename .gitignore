@@ -42,3 +42,4 @@ docker-compose.override.yml
 .terraform
 *.tfstate
 *.tfstate.backup
+prod.env
