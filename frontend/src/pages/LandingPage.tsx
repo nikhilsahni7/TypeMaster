@@ -40,7 +40,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
             className="inline-flex items-center gap-2 px-4 py-1.5 border border-zinc-700 bg-zinc-900/50 text-zinc-300 text-xs font-mono tracking-wider rounded-full"
           >
             <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
-            STABLE RELEASE v2.0
+            STABLE RELEASE v2.1 (AUTO-DEPLOYED)
           </motion.div>
 
           <motion.h1
