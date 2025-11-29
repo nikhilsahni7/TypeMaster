@@ -8,9 +8,9 @@ pipeline {
         DB_HOST = credentials('DB_HOST')
         REDIS_ADDR = credentials('REDIS_ADDR')
         // Default values for non-sensitive data
-        DB_USER = 'postgres'
-        DB_NAME = 'postgres'
-        DB_PORT = '5432'
+        DB_USER = 'avnadmin'
+        DB_NAME = 'defaultdb'
+        DB_PORT = '14178'
     }
 
     stages {
